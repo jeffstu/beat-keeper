@@ -357,6 +357,9 @@ function getPlayerId() {
   return playerId;
 }
 
+const leaderboardApiPath = "/api/leaderboard";
+let serverAvailable = false;
+
 function loadLeaderboard() {
   try {
     return JSON.parse(localStorage.getItem(leaderboardKey)) || [];
@@ -369,6 +372,70 @@ function saveLeaderboard(entries) {
   localStorage.setItem(leaderboardKey, JSON.stringify(entries));
 }
 
+async function fetchLeaderboardFromServer() {
+  try {
+    const response = await fetch(leaderboardApiPath, { cache: "no-store" });
+    if (!response.ok) throw new Error("Server response not OK");
+    const entries = await response.json();
+    if (!Array.isArray(entries)) throw new Error("Invalid leaderboard format");
+    serverAvailable = true;
+    return entries;
+  } catch {
+    serverAvailable = false;
+    return null;
+  }
+}
+
+async function postLeaderboardToServer(entries) {
+  try {
+    const response = await fetch(leaderboardApiPath, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entries)
+    });
+    if (!response.ok) throw new Error("Server save failed");
+    serverAvailable = true;
+    return true;
+  } catch {
+    serverAvailable = false;
+    return false;
+  }
+}
+
+async function saveLeaderboardMaybeServer(entries) {
+  const savedOnServer = await postLeaderboardToServer(entries);
+  saveLeaderboard(entries);
+  return savedOnServer;
+}
+
+function mergeLeaderboardEntries(primary, fallback) {
+  const merged = new Map(primary.map((entry) => [entry.playerId, entry]));
+  for (const entry of fallback) {
+    const existing = merged.get(entry.playerId);
+    if (!existing || compareEntries(entry, existing) < 0) {
+      merged.set(entry.playerId, entry);
+    }
+  }
+  return Array.from(merged.values());
+}
+
+async function loadLeaderboardMaybeServer() {
+  const localEntries = loadLeaderboard();
+  const serverEntries = await fetchLeaderboardFromServer();
+  if (serverEntries) {
+    let mergedEntries = serverEntries;
+    if (localEntries.length) {
+      mergedEntries = mergeLeaderboardEntries(serverEntries, localEntries);
+      if (mergedEntries.length !== serverEntries.length || mergedEntries.some((entry, index) => entry.playerId !== serverEntries[index]?.playerId || compareEntries(entry, serverEntries[index]) !== 0)) {
+        await saveLeaderboardMaybeServer(mergedEntries);
+      }
+    }
+    saveLeaderboard(mergedEntries);
+    return mergedEntries;
+  }
+  return localEntries;
+}
+
 function compareEntries(a, b) {
   return b.score - a.score || b.level - a.level || b.accuracy - a.accuracy || a.finishedAt - b.finishedAt;
 }
@@ -377,7 +444,7 @@ function rankEntries(entries) {
   return [...entries].sort(compareEntries).map((entry, index) => ({ ...entry, rank: index + 1 }));
 }
 
-function saveScore(event) {
+async function saveScore(event) {
   event.preventDefault();
   if (!pendingResult) return;
 
@@ -400,8 +467,7 @@ function saveScore(event) {
     } else {
       entries[existingIndex] = nextEntry;
     }
-    saveLeaderboard(entries);
-    saved = true;
+    saved = await saveLeaderboardMaybeServer(entries);
   }
 
   renderLeaderboard();
@@ -509,7 +575,7 @@ window.addEventListener("resize", () => {
 
 renderHitStrip();
 playerNameInput.value = localStorage.getItem(playerNameKey) || "";
-renderLeaderboard();
+loadLeaderboardMaybeServer().then(() => renderLeaderboard());
 updateHud();
 resizeCanvas();
 drawLane(canvas.width, canvas.height, canvas.height * 0.56);
