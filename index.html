@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Beat Keeper</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="stage" aria-label="Beat Keeper rhythm game">
+        <div class="top-bar">
+          <div>
+            <p class="eyebrow">Beat Keeper</p>
+            <h1>Hold the beat when it disappears</h1>
+          </div>
+          <div class="level-pill" id="levelLabel">Level 1</div>
+        </div>
+
+        <div class="playfield">
+          <canvas id="beatCanvas" width="980" height="360" aria-label="Beat timing display"></canvas>
+          <div class="beat-orbit" aria-hidden="true">
+            <div class="beat-core" id="beatCore"></div>
+          </div>
+        </div>
+
+        <div class="hud">
+          <div class="meter">
+            <span>BPM</span>
+            <strong id="bpmValue">80</strong>
+          </div>
+          <div class="meter">
+            <span>Phase</span>
+            <strong id="phaseValue">Ready</strong>
+          </div>
+          <div class="meter">
+            <span>Accuracy</span>
+            <strong id="accuracyValue">0%</strong>
+          </div>
+          <div class="meter">
+            <span>Score</span>
+            <strong id="scoreValue">0</strong>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="startButton" type="button">Start</button>
+          <button id="tapButton" type="button">Tap</button>
+          <button id="nextButton" type="button" disabled>Next Level</button>
+        </div>
+
+        <div class="feedback-row">
+          <div class="hit-strip" id="hitStrip" aria-label="Recent hits"></div>
+          <p id="message" class="message">Press Start, listen to the count-in, then tap Space on every beat.</p>
+        </div>
+
+        <section class="leaderboard" aria-label="Leaderboard">
+          <div class="save-score">
+            <div>
+              <h2>Leaderboard</h2>
+              <p id="rankMessage" class="message">Finish a level to save your run.</p>
+            </div>
+            <form id="scoreForm" class="score-form">
+              <label for="playerName">Name</label>
+              <input id="playerName" name="playerName" type="text" maxlength="18" autocomplete="nickname" placeholder="Player" required>
+              <button id="saveScoreButton" type="submit" disabled>Save Score</button>
+            </form>
+          </div>
+
+          <ol id="leaderboardList" class="leaderboard-list"></ol>
+        </section>
+      </section>
+    </main>
+
+    <script src="game.js"></script>
+  </body>
+</html>
