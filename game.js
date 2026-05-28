@@ -429,6 +429,17 @@ function updateRankPreview() {
   rankMessage.textContent = `This run ranks #${playerEntry.rank}: ${pendingResult.score} points, level ${pendingResult.level}, ${pendingResult.accuracy}% accuracy.`;
 }
 
+let lastTapInputAt = 0;
+const tapInputDebounceMs = 100;
+
+function handleTapInput(event) {
+  event.preventDefault();
+  const now = performance.now();
+  if (now - lastTapInputAt < tapInputDebounceMs) return;
+  lastTapInputAt = now;
+  tap();
+}
+
 function renderLeaderboard() {
   const playerId = getPlayerId();
   const ranked = rankEntries(loadLeaderboard());
@@ -480,7 +491,8 @@ function escapeHtml(value) {
 }
 
 startButton.addEventListener("click", startLevel);
-tapButton.addEventListener("click", tap);
+tapButton.addEventListener("click", handleTapInput);
+tapButton.addEventListener("touchstart", handleTapInput, { passive: false });
 nextButton.addEventListener("click", nextLevel);
 scoreForm.addEventListener("submit", saveScore);
 playerNameInput.addEventListener("input", updateRankPreview);
