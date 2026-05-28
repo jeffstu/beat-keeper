@@ -13,6 +13,7 @@ const hitWindowMs = 180;
 const leaderboardKey = "BeatKeeperLeaderboard";
 const playerIdKey = "BeatKeeperPlayerId";
 const playerNameKey = "BeatKeeperPlayerName";
+const leaderboardApiPath = "/leaderboard.php";
 
 const canvas = document.querySelector("#beatCanvas");
 const ctx = canvas.getContext("2d");
@@ -357,7 +358,6 @@ function getPlayerId() {
   return playerId;
 }
 
-const leaderboardApiPath = "/api/leaderboard";
 let serverAvailable = false;
 
 function loadLeaderboard() {
