@@ -207,6 +207,26 @@ function tap() {
     .sort((a, b) => Math.abs(a.deltaMs) - Math.abs(b.deltaMs))[0];
 
   if (!target) {
+    // No beat within the strict hit window — try to tie this tap to the
+    // nearest unjudged beat within a larger grace window so we don't
+    // generate a separate tap-miss and later a judgement-miss for the same beat.
+    const now = audioContext.currentTime;
+    const largerWindowMs = Math.max(hitWindowMs * 2, (secondsPerBeat() * 1000) / 2);
+    const nearest = scheduledBeats
+      .filter((beat) => !beat.judged && !beat.countIn)
+      .map((beat) => ({ ...beat, deltaMs: (now - beat.time) * 1000 }))
+      .sort((a, b) => Math.abs(a.deltaMs) - Math.abs(b.deltaMs))[0];
+
+    if (nearest && Math.abs(nearest.deltaMs) <= largerWindowMs) {
+      const originalNearest = scheduledBeats.find((b) => b.index === nearest.index);
+      if (originalNearest) originalNearest.judged = true;
+      const distance = Math.abs(nearest.deltaMs);
+      addHit("miss", distance, nearest.silent);
+      message.textContent = `Miss ${Math.round(distance)}ms ${nearest.deltaMs < 0 ? "early" : "late"}.`;
+      return;
+    }
+
+    // Otherwise record a generic miss (not tied to a beat) for user feedback.
     addHit("miss", hitWindowMs, false);
     message.textContent = "Miss. Wait for the pulse and keep counting.";
     return;

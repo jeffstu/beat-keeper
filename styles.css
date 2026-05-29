@@ -259,6 +259,8 @@ h1 {
   color: var(--text);
   font-size: 12px;
   pointer-events: none;
+  z-index: 2;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
 }
 
 .hit-dot.good .hit-number {
