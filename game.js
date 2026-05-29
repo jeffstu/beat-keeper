@@ -226,8 +226,7 @@ function tap() {
       return;
     }
 
-    // No remaining beat to tie this tap to; record a generic miss.
-    addHit("miss", hitWindowMs, false, null);
+    // If the tap is too far from any beat, don't create a separate hit dot.
     message.textContent = "Miss. Wait for the pulse and keep counting.";
     return;
   }
