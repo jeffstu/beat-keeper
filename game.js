@@ -221,13 +221,13 @@ function tap() {
       const originalNearest = scheduledBeats.find((b) => b.index === nearest.index);
       if (originalNearest) originalNearest.judged = true;
       const distance = Math.abs(nearest.deltaMs);
-      addHit("miss", distance, nearest.silent);
+      addHit("miss", distance, nearest.silent, nearest.index);
       message.textContent = `Miss ${Math.round(distance)}ms ${nearest.deltaMs < 0 ? "early" : "late"}.`;
       return;
     }
 
     // Otherwise record a generic miss (not tied to a beat) for user feedback.
-    addHit("miss", hitWindowMs, false);
+    addHit("miss", hitWindowMs, false, null);
     message.textContent = "Miss. Wait for the pulse and keep counting.";
     return;
   }
@@ -248,15 +248,15 @@ function tap() {
   const quality = distance <= 55 ? "good" : distance <= 115 ? "ok" : "miss";
   const points = quality === "good" ? 100 : quality === "ok" ? 55 : 15;
   score += target.silent ? points * 2 : points;
-  addHit(quality, distance, target.silent);
+  addHit(quality, distance, target.silent, target.index);
 
   const timing = target.deltaMs < 0 ? "early" : "late";
   message.textContent = `${quality.toUpperCase()} ${Math.round(distance)}ms ${timing}${target.silent ? " in silence" : ""}.`;
   updateHud();
 }
 
-function addHit(quality, distance, silent) {
-  hits.push({ quality, distance, silent });
+function addHit(quality, distance, silent, beatIndex = null) {
+  hits.push({ quality, distance, silent, beatIndex });
   hits = hits.slice(-12);
   renderHitStrip();
 }
@@ -267,7 +267,7 @@ function updateJudgements() {
   scheduledBeats.forEach((beat) => {
     if (!beat.judged && !beat.countIn && now - beat.time > hitWindowMs / 1000) {
       beat.judged = true;
-      addHit("miss", hitWindowMs, beat.silent);
+      addHit("miss", hitWindowMs, beat.silent, beat.index);
     }
   });
 }
@@ -288,11 +288,11 @@ function renderHitStrip() {
   padded.forEach((hit, i) => {
     const dot = document.createElement("div");
     dot.className = `hit-dot${hit ? ` ${hit.quality}` : ""}`;
-    // show cyclic beat numbers 1..beatsPerBar to help track attempts
-    const number = (i % beatsPerBar) + 1;
     const label = document.createElement("span");
     label.className = "hit-number";
-    label.textContent = number;
+    // If the hit is associated with a beat index, show the absolute beat number (1-based).
+    // Otherwise leave blank for generic misses.
+    label.textContent = hit && typeof hit.beatIndex === "number" ? String(hit.beatIndex + 1) : "";
     dot.append(label);
     hitStrip.append(dot);
   });
