@@ -217,7 +217,7 @@ function tap() {
       .map((beat) => ({ ...beat, deltaMs: (now - beat.time) * 1000 }))
       .sort((a, b) => Math.abs(a.deltaMs) - Math.abs(b.deltaMs))[0];
 
-    if (nearest && Math.abs(nearest.deltaMs) <= largerWindowMs) {
+    if (nearest) {
       const originalNearest = scheduledBeats.find((b) => b.index === nearest.index);
       if (originalNearest) originalNearest.judged = true;
       const distance = Math.abs(nearest.deltaMs);
@@ -226,7 +226,7 @@ function tap() {
       return;
     }
 
-    // Otherwise record a generic miss (not tied to a beat) for user feedback.
+    // No remaining beat to tie this tap to; record a generic miss.
     addHit("miss", hitWindowMs, false, null);
     message.textContent = "Miss. Wait for the pulse and keep counting.";
     return;
@@ -290,9 +290,8 @@ function renderHitStrip() {
     dot.className = `hit-dot${hit ? ` ${hit.quality}` : ""}`;
     const label = document.createElement("span");
     label.className = "hit-number";
-    // If the hit is associated with a beat index, show the absolute beat number (1-based).
-    // Otherwise leave blank for generic misses.
-    label.textContent = hit && typeof hit.beatIndex === "number" ? String(hit.beatIndex + 1) : "";
+    // Show the beat number if available; otherwise show a fallback position number.
+    label.textContent = String(hit && typeof hit.beatIndex === "number" ? hit.beatIndex + 1 : i + 1);
     dot.append(label);
     hitStrip.append(dot);
   });
