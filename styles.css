@@ -256,21 +256,21 @@ h1 {
   display: grid;
   place-items: center;
   font-weight: 800;
-  color: rgba(245,247,251,0.88);
+  color: var(--text);
   font-size: 12px;
   pointer-events: none;
 }
 
 .hit-dot.good .hit-number {
-  color: rgba(11,29,8,0.96);
+  color: #07120f; /* dark on green */
 }
 
 .hit-dot.ok .hit-number {
-  color: rgba(28,20,6,0.98);
+  color: #1b1200; /* dark on yellow */
 }
 
 .hit-dot.miss .hit-number {
-  color: rgba(255,255,255,0.9);
+  color: #ffffff; /* white on red */
 }
 .hit-dot.good {
   background: var(--good);

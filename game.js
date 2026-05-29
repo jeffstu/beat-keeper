@@ -265,12 +265,11 @@ function getAccuracy() {
 function renderHitStrip() {
   hitStrip.innerHTML = "";
   const padded = [...Array(Math.max(0, 12 - hits.length)).fill(null), ...hits];
-  padded.forEach((hit) => {
+  padded.forEach((hit, i) => {
     const dot = document.createElement("div");
     dot.className = `hit-dot${hit ? ` ${hit.quality}` : ""}`;
     // show cyclic beat numbers 1..beatsPerBar to help track attempts
-    const idx = Array.from(hitStrip.children).length;
-    const number = (idx % beatsPerBar) + 1;
+    const number = (i % beatsPerBar) + 1;
     const label = document.createElement("span");
     label.className = "hit-number";
     label.textContent = number;
