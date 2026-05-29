@@ -245,6 +245,33 @@ h1 {
   border-radius: 50%;
 }
 
+
+.hit-dot {
+  position: relative;
+}
+
+.hit-number {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: rgba(245,247,251,0.88);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.hit-dot.good .hit-number {
+  color: rgba(11,29,8,0.96);
+}
+
+.hit-dot.ok .hit-number {
+  color: rgba(28,20,6,0.98);
+}
+
+.hit-dot.miss .hit-number {
+  color: rgba(255,255,255,0.9);
+}
 .hit-dot.good {
   background: var(--good);
 }
