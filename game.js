@@ -197,7 +197,7 @@ function finishLevel() {
 }
 
 function tap() {
-  if (!running || !audioContext) return;
+  if (levelFinished || !running || !audioContext) return;
 
   const now = audioContext.currentTime;
   const target = scheduledBeats
@@ -214,6 +214,15 @@ function tap() {
 
   const original = scheduledBeats.find((beat) => beat.index === target.index);
   original.judged = true;
+
+  // Mark any nearby beats within the hit window as judged so one tap
+  // cannot be used to register multiple separate beats (prevents rapid multi-taps)
+  const windowSec = hitWindowMs / 1000;
+  scheduledBeats.forEach((beat) => {
+    if (!beat.judged && !beat.countIn && Math.abs(beat.time - target.time) <= windowSec) {
+      beat.judged = true;
+    }
+  });
 
   const distance = Math.abs(target.deltaMs);
   const quality = distance <= 55 ? "good" : distance <= 115 ? "ok" : "miss";
@@ -496,10 +505,11 @@ function updateRankPreview() {
 }
 
 let lastTapInputAt = 0;
-const tapInputDebounceMs = 100;
+const tapInputDebounceMs = 150;
 
 function handleTapInput(event) {
   event.preventDefault();
+  if (levelFinished) return; // ignore taps once level has finished
   const now = performance.now();
   if (now - lastTapInputAt < tapInputDebounceMs) return;
   lastTapInputAt = now;
