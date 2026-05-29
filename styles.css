@@ -255,12 +255,13 @@ h1 {
   inset: 0;
   display: grid;
   place-items: center;
-  font-weight: 800;
+  font-weight: 900;
   color: var(--text);
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 1;
   pointer-events: none;
   z-index: 2;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.45);
 }
 
 .hit-dot.good .hit-number {

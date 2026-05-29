@@ -217,7 +217,7 @@ function tap() {
       .map((beat) => ({ ...beat, deltaMs: (now - beat.time) * 1000 }))
       .sort((a, b) => Math.abs(a.deltaMs) - Math.abs(b.deltaMs))[0];
 
-    if (nearest) {
+    if (nearest && Math.abs(nearest.deltaMs) <= largerWindowMs) {
       const originalNearest = scheduledBeats.find((b) => b.index === nearest.index);
       if (originalNearest) originalNearest.judged = true;
       const distance = Math.abs(nearest.deltaMs);
